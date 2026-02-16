@@ -202,16 +202,27 @@ def parse_entry(entry_element: ET.Element) -> dict[str, Any]:
     return result
 
 
+def _is_schema_entry(entry: ET.Element) -> bool:
+    """Check if an Entry is a schema template (empty zType)."""
+    z_type = entry.find("zType")
+    if z_type is None:
+        return True
+    return z_type.text is None or z_type.text.strip() == ""
+
+
 def parse_xml_file(path: Path) -> list[dict[str, Any]]:
     """Parse an entire XML data file, returning all data entries.
 
-    Skips the first <Entry> (schema template).
+    Skips schema template entries (detected by empty zType).
+    Base game files have a schema entry as their first Entry;
+    expansion files do not.
     """
     tree = ET.parse(path)
     root = tree.getroot()
     entries = root.findall("Entry")
 
-    if len(entries) <= 1:
-        return []
-
-    return [parse_entry(entry) for entry in entries[1:]]
+    return [
+        parse_entry(entry)
+        for entry in entries
+        if not _is_schema_entry(entry)
+    ]

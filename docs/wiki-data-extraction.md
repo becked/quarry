@@ -454,9 +454,9 @@ The XML files are the source of truth. Parsing them directly is simpler and more
 
 ### Handling the Schema Entry
 
-The first `<Entry>` in every **base** XML file is a schema template with empty values. It exists so the game knows the full field set. The pipeline skips the first Entry unconditionally for base files.
+The first `<Entry>` in every **base** XML file is a schema template with empty values. It exists so the game knows the full field set. Expansion files (e.g., `asset-btt.xml`, `council-btt.xml`) do **not** have a schema entry — their first `<Entry>` is real data.
 
-**Important:** Expansion files (e.g., `asset-btt.xml`, `council-btt.xml`) do **not** have a schema entry — their first `<Entry>` is real data. The pipeline must not skip the first entry when parsing expansion files.
+The pipeline detects schema entries by checking for an empty `zType` element, rather than unconditionally skipping the first entry. This handles both base and expansion files correctly.
 
 ### Field Name Normalization
 

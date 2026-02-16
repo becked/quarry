@@ -11,3 +11,6 @@ wheels/
 
 # Pipeline output
 output/
+
+# Game data symlink (local install)
+Reference
