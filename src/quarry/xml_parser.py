@@ -184,7 +184,8 @@ def parse_entry(entry_element: ET.Element) -> dict[str, Any]:
     """Parse a single <Entry> element into a dict.
 
     Detects field types from tag names, parses accordingly.
-    Omits fields whose parsed value is None or False.
+    Omits fields whose parsed value is None. Keeps False booleans
+    so that filters can distinguish "explicitly false" from "not set".
     """
     result: dict[str, Any] = {}
     for child in entry_element:
@@ -193,8 +194,6 @@ def parse_entry(entry_element: ET.Element) -> dict[str, Any]:
         value = parse_field(child, field_type)
 
         if value is None:
-            continue
-        if value is False:
             continue
 
         result[tag] = value

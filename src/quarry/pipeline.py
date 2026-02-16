@@ -71,9 +71,14 @@ def process_category(
             # Resolve text fields
             tf = text_field_map.get(xml_field)
             if tf is not None:
-                resolved = text_resolver.resolve(str(value))
+                lookup_key = tf.text_key_prefix + str(value)
+                resolved = text_resolver.resolve(lookup_key)
                 if resolved is not None:
                     output_entry[tf.output_field] = resolved
+                continue
+
+            # Omit False booleans from output (kept in parsed dict for filters)
+            if value is False:
                 continue
 
             # Normalize field name and include

@@ -14,6 +14,7 @@ class TextResolver:
     def __init__(self, infos_dir: Path, language: str = "en-US") -> None:
         field_name = self._validate_language(infos_dir, language)
         self._dict = self._build_dictionary(infos_dir, field_name)
+        self._gendered_dict = self._build_gendered_dictionary(infos_dir)
 
     def _validate_language(self, infos_dir: Path, language: str) -> str:
         """Validate language code against language.xml.
@@ -63,8 +64,40 @@ class TextResolver:
 
         return result
 
+    def _build_gendered_dictionary(self, infos_dir: Path) -> dict[str, str]:
+        """Parse all genderedText*.xml files to map GENDERED_TEXT_* keys to masculine TEXT_* keys."""
+        result: dict[str, str] = {}
+        for gendered_path in sorted(infos_dir.glob("genderedText*.xml")):
+            tree = ET.parse(gendered_path)
+            for entry in tree.getroot().findall("Entry"):
+                z_type_el = entry.find("zType")
+                if z_type_el is None or not z_type_el.text:
+                    continue
+
+                texts_el = entry.find("Texts")
+                if texts_el is None:
+                    continue
+
+                gendered_key = z_type_el.text.strip()
+                for pair in texts_el.findall("Pair"):
+                    index_el = pair.find("zIndex")
+                    value_el = pair.find("zValue")
+                    if (index_el is not None and value_el is not None
+                            and index_el.text == "GRAMMATICAL_GENDER_MASCULINE"
+                            and value_el.text):
+                        result[gendered_key] = value_el.text.strip()
+                        break
+
+        return result
+
     def resolve(self, text_key: str) -> str | None:
-        """Look up a text key and return the localized display string."""
+        """Look up a text key and return the localized display string.
+
+        Handles GENDERED_TEXT_* keys by resolving through genderedText.xml
+        to the masculine TEXT_* key first, then looking up the display string.
+        """
+        if text_key.startswith("GENDERED_TEXT_"):
+            text_key = self._gendered_dict.get(text_key, text_key)
         return self._dict.get(text_key)
 
     def __len__(self) -> int:

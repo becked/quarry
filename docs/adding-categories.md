@@ -58,16 +58,24 @@ The `m` prefix in wiki-categories.txt is C# member naming — drop it for the XM
 - `meFirstRuler` → `FirstRuler` (no prefix in XML, parsed as string)
 - `miSubjectWeight` → `iSubjectWeight` (parsed as int)
 
-Since the parser omits `False` booleans and `None` values, checking for a truthy boolean is just:
+The parser keeps `False` booleans in the parsed dict (so filters can distinguish "explicitly false" from "not set") but omits them from JSON output. `None` values are omitted everywhere.
+
+**Important:** Some boolean fields have a default of `true` in the game's C# code (e.g., `bEncyclopedia` for improvements, traits, occurrences). These fields are often absent from the XML, meaning entries rely on the game default. For default-true fields, use:
 
 ```python
-entry.get("bEncyclopedia") is True
+entry.get("bEncyclopedia") is not False  # includes absent (default true) and explicit true
 ```
 
-And checking for absence/false is:
+For default-false fields (e.g., `bEncyclopedia` on missions), use:
 
 ```python
-"bWonder" not in entry
+entry.get("bEncyclopedia") is True  # requires explicit true
+```
+
+Checking for an explicitly-false boolean:
+
+```python
+entry.get("bWonder") is not True  # excludes only explicit true
 ```
 
 ### 4. Check for Expansion Files
@@ -180,9 +188,12 @@ Things to check:
 | `text_fields` | `list[TextField]` | `[]` | Fields to resolve via text dictionary |
 | `exclude_fields` | `set[str]` | `set()` | XML field names to omit from output |
 
+`TextField` has three fields: `xml_field` (source), `output_field` (JSON key), and optional `text_key_prefix` (prepended before text lookup, e.g. `"TEXT_"` for character FirstName fields).
+
 Built-in filters:
 - `no_filter` — accept all entries
-- `content_check` — exclude entries with `GameContentRequired` set (DLC-gated)
+- `encyclopedia_default_true` — exclude entries that explicitly set `bEncyclopedia=0` (for types where it defaults to true)
+- `encyclopedia_default_false` — include only entries that explicitly set `bEncyclopedia=1` (for types where it defaults to false)
 
 ## How Field Names are Normalized
 
@@ -210,7 +221,7 @@ The parser detects types from the Hungarian prefix on the XML tag:
 |--------|-----------|-----------|-------|
 | `i` | int | `number` | `-1` sentinel → omitted |
 | `f` | float | `number` | |
-| `b` | bool | `true` | `false` → omitted |
+| `b` | bool | `true` | `false` kept in parsed dict, omitted from JSON |
 | `z`, `e` | string | `"string"` | `"NONE"` → omitted |
 | no prefix | string | `"string"` | `Name`, `EffectPlayer`, etc. |
 | `ae` | list | `["A", "B"]` | or string map if `<Pair>` children |
