@@ -1,0 +1,213 @@
+  Navigation Category: DLCSummaryConcepts
+  Display Name (text key): (conditional)
+  XML Data Source: concept.xml
+  Filter Logic: meGameContentSummary != NONE
+  ────────────────────────────────────────
+  Navigation Category: ScenarioConcepts
+  Display Name (text key): (conditional)
+  XML Data Source: concept.xml
+  Filter Logic: matches current scenario
+  ────────────────────────────────────────
+  Navigation Category: Concepts
+  Display Name (text key): Concepts
+  XML Data Source: concept.xml
+  Filter Logic: no scenario, content check
+  ────────────────────────────────────────
+  Navigation Category: Tutorials
+  Display Name (text key): Tutorials
+  XML Data Source: tutorial.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Yields
+  Display Name (text key): Yields
+  XML Data Source: yield.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Technologies
+  Display Name (text key): Technologies
+  XML Data Source: tech.xml
+  Filter Logic: content check
+  ────────────────────────────────────────
+  Navigation Category: Units
+  Display Name (text key): Units
+  XML Data Source: unit.xml
+  Filter Logic: content check
+  ────────────────────────────────────────
+  Navigation Category: Specialists
+  Display Name (text key): Specialists
+  XML Data Source: specialist.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Projects
+  Display Name (text key): Projects
+  XML Data Source: project.xml
+  Filter Logic: !mbHidden && mbEncyclopedia
+  ────────────────────────────────────────
+  Navigation Category: Laws
+  Display Name (text key): Laws
+  XML Data Source: law.xml
+  Filter Logic: lawClass not disabled
+  ────────────────────────────────────────
+  Navigation Category: Religions
+  Display Name (text key): Religions
+  XML Data Source: religion.xml
+  Filter Logic: pagan/content filtering
+  ────────────────────────────────────────
+  Navigation Category: Nations
+  Display Name (text key): Nations
+  XML Data Source: nation.xml
+  Filter Logic: content check
+  ────────────────────────────────────────
+  Navigation Category: FamilyClasses
+  Display Name (text key): Family Classes
+  XML Data Source: familyClass.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Dynasties
+  Display Name (text key): Dynasties
+  XML Data Source: dynasty.xml
+  Filter Logic: has meFirstRuler
+  ────────────────────────────────────────
+  Navigation Category: Characters
+  Display Name (text key): Characters
+  XML Data Source: character.xml
+  Filter Logic: has meFirstName
+  ────────────────────────────────────────
+  Navigation Category: Tribes
+  Display Name (text key): Tribes
+  XML Data Source: tribe.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Cognomen
+  Display Name (text key): Cognomen
+  XML Data Source: cognomen.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Improvements
+  Display Name (text key): Improvements
+  XML Data Source: improvement.xml
+  Filter Logic: mbEncyclopedia && mbBuild && !mbWonder && !religious
+  ────────────────────────────────────────
+  Navigation Category: Wonders
+  Display Name (text key): Wonders
+  XML Data Source: improvement.xml
+  Filter Logic: mbEncyclopedia && mbWonder
+  ────────────────────────────────────────
+  Navigation Category: ReligiousImprovements
+  Display Name (text key): Religious Improvements
+  XML Data Source: improvement.xml
+  Filter Logic: mbEncyclopedia && !mbWonder && isReligious
+  ────────────────────────────────────────
+  Navigation Category: SpecialImprovements
+  Display Name (text key): Special Improvements
+  XML Data Source: improvement.xml
+  Filter Logic: mbEncyclopedia && !mbBuild && !mbWonder && !religious
+  ────────────────────────────────────────
+  Navigation Category: Resources
+  Display Name (text key): Resources
+  XML Data Source: resource.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Vegetation
+  Display Name (text key): Vegetation
+  XML Data Source: vegetation.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Heights
+  Display Name (text key): Heights
+  XML Data Source: height.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Ratings
+  Display Name (text key): Attributes
+  XML Data Source: rating.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Terrain
+  Display Name (text key): Terrain
+  XML Data Source: terrain.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Archetypes
+  Display Name (text key): Archetypes
+  XML Data Source: trait.xml
+  Filter Logic: mbArchetype && mbEncyclopedia
+  ────────────────────────────────────────
+  Navigation Category: Traits
+  Display Name (text key): Traits
+  XML Data Source: trait.xml
+  Filter Logic: !mbArchetype && mbEncyclopedia && !mbWeakness &&
+    !mbStrength && !mbItem
+  ────────────────────────────────────────
+  Navigation Category: TraitsAdjectives
+  Display Name (text key): Strengths & Weaknesses
+  XML Data Source: trait.xml
+  Filter Logic: !mbArchetype && mbEncyclopedia && (mbWeakness ||
+    mbStrength) && !mbItem
+  ────────────────────────────────────────
+  Navigation Category: TraitsItems
+  Display Name (text key): Items
+  XML Data Source: trait.xml
+  Filter Logic: mbItem
+  ────────────────────────────────────────
+  Navigation Category: Councils
+  Display Name (text key): Councils
+  XML Data Source: council.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Theologies
+  Display Name (text key): Theologies
+  XML Data Source: theology.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Promotions
+  Display Name (text key): Promotions
+  XML Data Source: promotion.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: UnitEffects
+  Display Name (text key): Unit Effects
+  XML Data Source: effectUnit.xml
+  Filter Logic: excludes effects tied to unavailable content
+  ────────────────────────────────────────
+  Navigation Category: Missions
+  Display Name (text key): Missions
+  XML Data Source: mission.xml
+  Filter Logic: mbEncyclopedia
+  ────────────────────────────────────────
+  Navigation Category: HintTexts
+  Display Name (text key): Hints
+  XML Data Source: text entries starting with TEXT_HINT_ (+ DLC variants)
+  Filter Logic: grouped in batches of 10
+  ────────────────────────────────────────
+  Navigation Category: DifficultyLevels
+  Display Name (text key): Difficulty Levels
+  XML Data Source: difficultyMode.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: VictoryTypes
+  Display Name (text key): Victory Types
+  XML Data Source: victory.xml
+  Filter Logic: all entries
+  ────────────────────────────────────────
+  Navigation Category: Occurrences
+  Display Name (text key): Occurrences
+  XML Data Source: occurrence.xml
+  Filter Logic: mbEncyclopedia
+  ────────────────────────────────────────
+  Navigation Category: NationalAmbitions
+  Display Name (text key): National Ambitions
+  XML Data Source: goal.xml
+  Filter Logic: mbVictoryEligible && miSubjectWeight > 0
+
+  Notable patterns:
+  - improvement.xml is split across 4 categories using boolean flags
+  (mbBuild, mbWonder, isReligious)
+  - trait.xml is split across 4 categories using flags (mbArchetype,
+  mbWeakness/mbStrength, mbItem)
+  - HintTexts is unique — it doesn't come from an info XML, it scans the
+  text table for keys starting with TEXT_HINT_
+  - DLCSummaryConcepts and ScenarioConcepts are conditional categories
+  that only appear when relevant DLC/scenario is active
+
+

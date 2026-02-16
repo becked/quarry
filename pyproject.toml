@@ -1,0 +1,14 @@
+[project]
+name = "quarry"
+version = "0.1.0"
+description = "Old World game data extraction pipeline"
+readme = "README.md"
+authors = [
+    { name = "Jeff Beck", email = "becked@fastmail.fm" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
