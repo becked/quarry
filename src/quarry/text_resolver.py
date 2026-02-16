@@ -4,8 +4,12 @@ Parses language.xml to determine the correct column name for a language code,
 then parses all text-*.xml files to build a text_key -> display_string dictionary.
 """
 
+import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+_TEXT_REF_RE = re.compile(r"\{(TEXT_\w+)\}")
+_MAX_RESOLVE_DEPTH = 3
 
 
 class TextResolver:
@@ -13,7 +17,7 @@ class TextResolver:
 
     def __init__(self, infos_dir: Path, language: str = "en-US") -> None:
         field_name = self._validate_language(infos_dir, language)
-        self._dict = self._build_dictionary(infos_dir, field_name)
+        self._dict, self._forms = self._build_dictionary(infos_dir, field_name)
         self._gendered_dict = self._build_gendered_dictionary(infos_dir)
 
     def _validate_language(self, infos_dir: Path, language: str) -> str:
@@ -36,13 +40,18 @@ class TextResolver:
             f"Unknown language '{language}'. Valid options: {', '.join(valid)}"
         )
 
-    def _build_dictionary(self, infos_dir: Path, field_name: str) -> dict[str, str]:
-        """Parse all text-*.xml files and build the lookup dictionary.
+    def _build_dictionary(
+        self, infos_dir: Path, field_name: str
+    ) -> tuple[dict[str, str], dict[str, list[str]]]:
+        """Parse all text-*.xml files and build lookup dictionaries.
 
-        For each entry, extracts the zType and the text from the language column,
-        taking the first tilde-separated form as the display string.
+        For each entry, extracts the zType and the text from the language column.
+        Returns a tuple of (display_dict, forms_dict) where display_dict maps
+        text keys to first tilde-separated form and forms_dict maps text keys
+        to the full list of tilde-separated forms.
         """
-        result: dict[str, str] = {}
+        display: dict[str, str] = {}
+        forms: dict[str, list[str]] = {}
         for text_file in sorted(infos_dir.glob("text-*.xml")):
             tree = ET.parse(text_file)
             entries = tree.getroot().findall("Entry")
@@ -58,11 +67,11 @@ class TextResolver:
                 text_key = z_type_el.text.strip()
                 raw_text = lang_el.text.strip()
 
-                # Take the first tilde-separated form (base/singular)
-                display_text = raw_text.split("~")[0]
-                result[text_key] = display_text
+                parts = raw_text.split("~")
+                display[text_key] = parts[0]
+                forms[text_key] = parts
 
-        return result
+        return display, forms
 
     def _build_gendered_dictionary(self, infos_dir: Path) -> dict[str, str]:
         """Parse all genderedText*.xml files to map GENDERED_TEXT_* keys to masculine TEXT_* keys."""
@@ -90,15 +99,27 @@ class TextResolver:
 
         return result
 
-    def resolve(self, text_key: str) -> str | None:
+    def resolve(self, text_key: str, _depth: int = 0) -> str | None:
         """Look up a text key and return the localized display string.
 
         Handles GENDERED_TEXT_* keys by resolving through genderedText.xml
         to the masculine TEXT_* key first, then looking up the display string.
+        Recursively resolves any {TEXT_*} references found in the result.
         """
         if text_key.startswith("GENDERED_TEXT_"):
             text_key = self._gendered_dict.get(text_key, text_key)
-        return self._dict.get(text_key)
+        result = self._dict.get(text_key)
+        if result is None or _depth >= _MAX_RESOLVE_DEPTH:
+            return result
+        return _TEXT_REF_RE.sub(
+            lambda m: self.resolve(m.group(1), _depth + 1) or m.group(0),
+            result,
+        )
+
+    @property
+    def forms(self) -> dict[str, list[str]]:
+        """All text keys mapped to their tilde-separated forms."""
+        return self._forms
 
     def __len__(self) -> int:
         """Number of text entries loaded."""
