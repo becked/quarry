@@ -83,17 +83,18 @@ Field names encode their data type via Hungarian notation prefixes:
 | `i` | Integer | `<iStrength>40</iStrength>` |
 | `f` | Float | `<fAttackDuration>2.0</fAttackDuration>` |
 | `b` | Boolean (0/1) | `<bMelee>1</bMelee>` |
-| `m` | Mixed/no prefix | `<Name>TEXT_UNIT_WARRIOR</Name>` |
 | `e` | Enum reference | `<eTechPrereq>TECH_IRONWORKING</eTechPrereq>` |
 | `ae` | List of enums | `<aeUpgradeUnit>` container |
 | `ai` | Sparse int map (enum-indexed) | `<aiYieldCost>` container |
 | `ab` | Sparse bool map (enum-indexed) | `<abTechPrereq>` container |
 | `az` | Sparse string map (enum-indexed) | `<azGenderPortraitName>` container |
+| `aae` | Sparse enum-list map | `<aaeTraitEffectUnit>` container |
 | `aai` | 2D sparse map | `<aaiTerrainYieldModifier>` container |
+| (none) | String (text key or enum ref) | `<Name>TEXT_UNIT_WARRIOR</Name>` |
 
 ### Data Patterns
 
-The XML uses 7 distinct structural patterns. Every field in every file uses one of these.
+The XML uses 6 distinct structural patterns. Every field in every file uses one of these.
 
 #### Pattern 1: Single Value
 
@@ -216,20 +217,7 @@ Maps two enum dimensions to a value. Used for relationships like terrain + yield
 
 **Output:** Nested JSON object — `{ "TERRAIN_LUSH": { "YIELD_FOOD": 40 }, ... }`.
 
-#### Pattern 7: Relationship Map
-
-Maps enum keys to enum values, representing entity-to-entity relationships.
-
-```xml
-<aeRelationships>
-  <Pair>
-    <zIndex>CHARACTER_ESARHADDON</zIndex>
-    <zValue>RELATIONSHIP_MENTOR_OF</zValue>
-  </Pair>
-</aeRelationships>
-```
-
-**Output:** JSON object with string keys and string values (same structure as Pattern 5, but semantically a relationship).
+**Note on `ae` prefix variant:** Some `ae`-prefixed fields use `<Pair>` structure (like Pattern 5) instead of `<zValue>` children. For example, `aeHeightAsset` in `terrain.xml` maps height enums to asset strings via `<Pair><zIndex>...</zIndex><zValue>...</zValue></Pair>`. The parser detects this by checking whether the element contains `<Pair>` children and handles it as a sparse string map.
 
 ### Special Values
 
@@ -245,19 +233,20 @@ Maps enum keys to enum values, representing entity-to-entity relationships.
 
 Expansion packs add variant XML files with suffixes:
 
-| Suffix | Expansion |
-|--------|-----------|
-| `-wog.xml` | Wonders of the Ancient World |
-| `-btt.xml` | Behind the Throne |
-| `-sap.xml` | Sacred and Profane |
+| Suffix | Expansion | File Count |
+|--------|-----------|------------|
+| `-wog.xml` | Wonders of the Ancient World | 24 |
+| `-btt.xml` | Behind the Throne | 25 |
+| `-sap.xml` | Sacred and Profane | 27 |
+| `-wd.xml` | (additional content pack) | 12 |
 
-These files add new entries to existing categories (e.g., `unit-wog.xml` adds expansion units). The pipeline should merge expansion entries into the base category during parsing. Entries use the same XML structure as base game files.
+These files add new entries to existing categories (e.g., `council-btt.xml` adds expansion councils). The pipeline merges expansion entries into the base category during parsing. Entries use the same XML structure as base game files.
 
 ## Localization System
 
 ### Text Files
 
-Localized strings are stored in `text-*.xml` files (150+ files). Each entry maps a text key to translations in all supported languages:
+Localized strings are stored in `text-*.xml` files (129 files). Each entry maps a text key to translations in all supported languages:
 
 ```xml
 <Entry>
@@ -308,75 +297,43 @@ The pipeline accepts a **language flag** at runtime (e.g., `--language en-US`). 
 
 ## Output Design
 
-### Structure: Normalized with Reverse Indexes
+### Structure: One File Per Category
 
-The output uses **normalized JSON** with string ID references. Each entity category is a top-level collection keyed by `mzType` identifiers. Cross-references between entities use these string IDs.
+The pipeline outputs **one JSON file per wiki category** (e.g., `technologies.json`, `units.json`). Each file contains normalized JSON with string ID references. Entries are keyed by their `zType` identifier. Cross-references between entities use these string IDs.
 
-The pipeline pre-computes **reverse indexes** — relationships that are implicit in the raw data but not explicitly stored. This means clients don't need to scan all entities to answer questions like "what does this tech unlock?"
+In the future, the pipeline will pre-compute **reverse indexes** — relationships that are implicit in the raw data but not explicitly stored (e.g., "what does this tech unlock?"). These are not yet implemented.
 
 ### Example
+
+`technologies.json`:
 
 ```json
 {
   "meta": {
-    "gameVersion": "1.0.81366",
+    "category": "technologies",
     "language": "en-US",
     "extractedAt": "2026-02-15T12:00:00Z"
   },
-  "units": {
-    "UNIT_WARRIOR": {
-      "name": "Warrior",
-      "strength": 40,
-      "hpMax": 20,
-      "movement": 2,
-      "melee": true,
-      "techPrereq": "TECH_IRONWORKING",
-      "productionType": "YIELD_TRAINING",
-      "production": 60,
-      "yieldCost": {
-        "YIELD_IRON": 50
-      },
-      "yieldConsumption": {
-        "YIELD_FOOD": 1,
-        "YIELD_IRON": 1
-      },
-      "upgradesTo": ["UNIT_AXEMAN", "UNIT_SPEARMAN"],
-      "upgradesFrom": ["UNIT_MILITIA"],
-      "obsoleteTechs": ["TECH_STEEL", "TECH_PHALANX"],
-      "unitTraits": ["UNITTRAIT_MELEE", "UNITTRAIT_INFANTRY"],
-      "formations": ["FORMATION_WARRIOR", "FORMATION_DEFAULT_WATER"],
-      "excludedByNations": ["NATION_EGYPT"]
-    }
-  },
-  "techs": {
+  "entries": {
     "TECH_IRONWORKING": {
       "name": "Ironworking",
+      "advice": "This essential tech unlocks link(UNIT_WARRIOR,2)...",
+      "history": "{0} has unlocked the secret of working with iron.",
+      "iconName": "TECH_IRONWORKING",
       "cost": 80,
-      "column": 2,
-      "row": 3,
-      "techPrereqs": ["TECH_MINING"],
-      "effectPlayer": "EFFECTPLAYER_TECH_IRONWORKING",
-      "unlocksUnits": ["UNIT_WARRIOR", "UNIT_SPEARMAN"],
-      "unlocksImprovements": ["IMPROVEMENT_MINE"],
-      "requiredByTechs": ["TECH_STEEL", "TECH_LABOR_FORCE"],
-      "obsoletesUnits": []
-    }
-  },
-  "improvements": {
-    "IMPROVEMENT_FARM": {
-      "name": "Farm",
-      "buildTurns": 3,
-      "yieldOutput": {
-        "YIELD_FOOD": 100
-      },
-      "terrainYieldModifier": {
-        "TERRAIN_LUSH": { "YIELD_FOOD": 40 },
-        "TERRAIN_ARID": { "YIELD_FOOD": -40 }
-      },
-      "adjacencyYieldRate": {
-        "IMPROVEMENT_IRRIGATION": { "YIELD_FOOD": 50 }
-      },
-      "builtByUnits": ["UNIT_WORKER"]
+      "column": 0,
+      "row": 2
+    },
+    "TECH_LABOR_FORCE": {
+      "name": "Labor Force",
+      "advice": "...",
+      "history": "...",
+      "iconName": "TECH_LABOR_FORCE",
+      "effectPlayer": "EFFECTPLAYER_TECH_LABOR_FORCE",
+      "cost": 120,
+      "column": 1,
+      "row": 1,
+      "techPrereq": ["TECH_IRONWORKING"]
     }
   }
 }
@@ -472,15 +429,15 @@ Game version (optional) ──►  Resolve text keys to strings       dev team)
    - Skip the first Entry (schema template)
    - Parse each subsequent Entry into a structured object
    - Resolve text key references (Name, Description, etc.) to display strings via the text dictionary
-   - Handle all 7 data patterns (single values, lists, sparse maps, 2D maps, etc.)
-5. **Merge expansion content** — parse `-wog.xml`, `-btt.xml`, `-sap.xml` variant files and merge entries into base categories
+   - Handle all 6 data patterns (single values, lists, sparse maps, 2D maps, etc.)
+5. **Merge expansion content** — parse `-wog.xml`, `-btt.xml`, `-sap.xml`, `-wd.xml` variant files and merge entries into base categories
 6. **Compute reverse indexes** — walk all parsed entities, build reverse relationship maps
 7. **Emit JSON** — write the final structured output with metadata
 
 ### CLI Interface
 
 ```
-wiki-extract --game-path "/path/to/Old World" --language en-US [--version "1.0.81366"]
+python -m quarry --game-path "/path/to/Old World" --language en-US --output-dir ./output [--version "1.0.81366"] [--categories technologies units]
 ```
 
 ## Implementation Notes
@@ -497,10 +454,9 @@ The XML files are the source of truth. Parsing them directly is simpler and more
 
 ### Handling the Schema Entry
 
-The first `<Entry>` in every XML file is a schema template with empty values. It exists so the game knows the full field set. The pipeline must detect and skip it. Detection approaches:
+The first `<Entry>` in every **base** XML file is a schema template with empty values. It exists so the game knows the full field set. The pipeline skips the first Entry unconditionally for base files.
 
-- Skip the first Entry unconditionally (simplest — this is consistent across all files)
-- Check for empty `<zType/>` (schema entries have no type string)
+**Important:** Expansion files (e.g., `asset-btt.xml`, `council-btt.xml`) do **not** have a schema entry — their first `<Entry>` is real data. The pipeline must not skip the first entry when parsing expansion files.
 
 ### Field Name Normalization
 
@@ -510,11 +466,15 @@ XML field names use Hungarian notation (`iStrength`, `bMelee`, `zIconName`). The
 |-----------|----------|
 | `iStrength` | `strength` |
 | `bMelee` | `melee` |
-| `zType` | `id` (special case) |
+| `zType` | (used as dict key, not a field) |
+| `zIconName` | `iconName` |
 | `TechPrereq` | `techPrereq` |
+| `EffectPlayer` | `effectPlayer` |
 | `aiYieldCost` | `yieldCost` |
+| `abTechPrereq` | `techPrereq` |
+| `aaiTerrainYieldModifier` | `terrainYieldModifier` |
 
-The dev team should define the exact normalization rules. The prefix stripping is straightforward — the first lowercase letter(s) before the first uppercase letter are the type prefix.
+The prefix stripping uses the regex `^[a-z]+(?=[A-Z])` — the first lowercase letter(s) before the first uppercase letter are the type prefix. Fields starting with an uppercase letter (e.g., `Name`, `EffectPlayer`) have no prefix and just get their first character lowercased.
 
 ### NONE Values
 
@@ -522,16 +482,17 @@ Enum reference fields with the value `NONE` should be treated as null/absent in 
 
 ### Generic XML Parser
 
-Since all 338 files use the same 7 structural patterns and the type prefixes are consistent, a **single generic parser** can handle every file. The parser inspects the field name prefix to determine how to parse the content:
+Since all 338 files use the same 6 structural patterns and the type prefixes are consistent, a **single generic parser** can handle every file. The parser inspects the field name prefix to determine how to parse the content:
 
-- `i` prefix → parse as integer
+- `i` prefix → parse as integer (falls back to string if not a valid integer — a few `i`-prefixed fields contain string values, e.g., `iTriggerSubject` in `eventStory.xml`)
 - `f` prefix → parse as float
 - `b` prefix → parse as boolean
 - `z` or `e` prefix → parse as string
-- `ae` prefix → parse as list of strings
+- `ae` prefix → parse as list of strings if children are `<zValue>` elements; parse as sparse string map if children are `<Pair>` elements (both variants exist in the data)
 - `ai` prefix → look for `<Pair>` children, parse as sparse int map
 - `ab` prefix → look for `<Pair>` children, parse as sparse bool map → list of keys
 - `az` prefix → look for `<Pair>` children, parse as sparse string map
+- `aae` prefix → look for `<Pair>` children containing `<zValue>` lists, parse as sparse enum-list map
 - `aai` prefix → look for `<Pair>/<SubPair>` children, parse as 2D map
 - No recognized prefix → parse as string
 
