@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const pageTitle = `${title} - Old World Encyclopedia`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="min-h-screen bg-stone-50 text-stone-900">
+    <header class="bg-stone-800 text-stone-100">
+      <nav class="mx-auto max-w-5xl px-4 py-4">
+        <a href="/" class="text-lg font-bold tracking-tight hover:text-amber-300">
+          Old World Encyclopedia
+        </a>
+      </nav>
+    </header>
+    <main class="mx-auto max-w-5xl px-4 py-8">
+      <slot />
+    </main>
+    <footer
+      class="mt-16 border-t border-stone-200 py-6 text-center text-sm text-stone-500"
+    >
+      Data extracted by Quarry from Old World game files.
+    </footer>
+  </body>
+</html>

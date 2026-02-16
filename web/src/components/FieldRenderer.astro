@@ -1,0 +1,164 @@
+---
+import { renderMarkup } from "@lib/markup";
+import { getTypeIndex } from "@lib/data";
+import type { FieldInfo } from "@lib/fields";
+
+interface Props {
+  field: FieldInfo;
+}
+
+const { field } = Astro.props;
+const { type, value } = field;
+const typeIndex = getTypeIndex();
+
+function typeIdLink(id: string): { href: string | null; label: string } {
+  const cat = typeIndex.get(id);
+  return { href: cat ? `/${cat}/${id}/` : null, label: id };
+}
+
+// Pre-cast values in frontmatter to avoid `as` in template expressions
+const listValue = Array.isArray(value) ? value : [];
+const mapEntries = typeof value === "object" && value !== null && !Array.isArray(value)
+  ? Object.entries(value as Record<string, unknown>)
+  : [];
+
+// For nestedMap: pre-compute inner entries for each outer key
+const nestedMapData = mapEntries.map(([outerKey, innerValue]) => ({
+  outerKey,
+  link: typeIdLink(outerKey),
+  innerEntries: typeof innerValue === "object" && innerValue !== null
+    ? Object.entries(innerValue as Record<string, unknown>)
+    : [],
+}));
+---
+
+{
+  type === "text" && (
+    <div
+      class="prose prose-stone prose-sm max-w-none"
+      set:html={renderMarkup(String(value))}
+    />
+  )
+}
+
+{type === "string" && <p class="text-stone-800">{String(value)}</p>}
+
+{
+  type === "typeId" && (() => {
+    const { href, label } = typeIdLink(String(value));
+    return href ? (
+      <a href={href} class="text-blue-700 hover:text-blue-900 underline decoration-blue-300">
+        {label}
+      </a>
+    ) : (
+      <span class="font-mono text-sm">{label}</span>
+    );
+  })()
+}
+
+{type === "number" && <p class="text-stone-800 tabular-nums">{String(value)}</p>}
+
+{
+  type === "boolean" && (
+    <span class="inline-block rounded bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5">
+      Yes
+    </span>
+  )
+}
+
+{
+  type === "list" && (
+    <ul class="space-y-1">
+      {listValue.map((item) => {
+        const id = String(item);
+        const { href, label } = typeIdLink(id);
+        return (
+          <li>
+            {href ? (
+              <a
+                href={href}
+                class="text-blue-700 hover:text-blue-900 underline decoration-blue-300"
+              >
+                {label}
+              </a>
+            ) : (
+              <span class="text-stone-800">{label}</span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
+
+{
+  type === "map" && (
+    <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+      {mapEntries.map(([k, v]) => {
+        const { href, label } = typeIdLink(k);
+        return (
+          <div class="contents">
+            <dt class="text-sm text-stone-600">
+              {href ? (
+                <a
+                  href={href}
+                  class="text-blue-700 hover:text-blue-900 underline decoration-blue-300"
+                >
+                  {label}
+                </a>
+              ) : (
+                <span>{label}</span>
+              )}
+            </dt>
+            <dd class="text-stone-800 tabular-nums">{String(v)}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  )
+}
+
+{
+  type === "nestedMap" && (
+    <div class="space-y-3">
+      {nestedMapData.map(({ link, innerEntries }) => (
+        <div>
+          <h3 class="text-sm font-medium text-stone-700 mb-1">
+            {link.href ? (
+              <a
+                href={link.href}
+                class="text-blue-700 hover:text-blue-900 underline decoration-blue-300"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <span>{link.label}</span>
+            )}
+          </h3>
+          <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 ml-4">
+            {innerEntries.map(([k, v]) => {
+              const inner = typeIdLink(k);
+              return (
+                <div class="contents">
+                  <dt class="text-sm text-stone-600">
+                    {inner.href ? (
+                      <a
+                        href={inner.href}
+                        class="text-blue-700 hover:text-blue-900 underline decoration-blue-300"
+                      >
+                        {inner.label}
+                      </a>
+                    ) : (
+                      <span>{inner.label}</span>
+                    )}
+                  </dt>
+                  <dd class="text-stone-800 tabular-nums">{String(v)}</dd>
+                </div>
+              );
+            })}
+          </dl>
+        </div>
+      ))}
+    </div>
+  )
+}

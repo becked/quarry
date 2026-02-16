@@ -17,3 +17,8 @@ output/
 
 # Game data symlink (local install)
 Reference
+
+# Web frontend
+web/node_modules/
+web/dist/
+web/.astro/

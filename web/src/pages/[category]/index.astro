@@ -1,0 +1,53 @@
+---
+import Base from "@layouts/Base.astro";
+import { getAllCategories, getCategory } from "@lib/data";
+import { renderMarkup, stripMarkup } from "@lib/markup";
+
+export function getStaticPaths() {
+  return getAllCategories().map((cat) => ({
+    params: { category: cat.name },
+    props: { displayName: cat.displayName },
+  }));
+}
+
+const { category } = Astro.params;
+const { displayName } = Astro.props;
+const catFile = getCategory(category);
+if (!catFile) return Astro.redirect("/");
+
+const entries = Object.entries(catFile.entries).map(([id, entry]) => ({
+  id,
+  name: typeof entry.name === "string" ? entry.name : id,
+  subtitle: String(entry.advice ?? entry.help ?? entry.description ?? ""),
+}));
+---
+
+<Base title={displayName}>
+  <nav class="text-sm text-stone-500 mb-4">
+    <a href="/" class="hover:text-stone-700">Home</a>
+    <span class="mx-1">/</span>
+    <span>{displayName}</span>
+  </nav>
+
+  <h1 class="text-3xl font-bold mb-2">{displayName}</h1>
+  <p class="text-stone-600 mb-6">{entries.length} entries</p>
+
+  <div class="space-y-2">
+    {
+      entries.map(({ id, name, subtitle }) => (
+        <a
+          href={`/${category}/${id}/`}
+          class="block rounded border border-stone-200 bg-white px-4 py-3 hover:bg-stone-50 hover:border-stone-300 transition-colors"
+        >
+          <div class="font-medium" set:html={renderMarkup(name)} />
+          {subtitle && (
+            <div
+              class="text-sm text-stone-500 mt-1 line-clamp-2"
+              set:html={renderMarkup(subtitle)}
+            />
+          )}
+        </a>
+      ))
+    }
+  </div>
+</Base>
