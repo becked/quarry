@@ -71,3 +71,7 @@ Adding a new category requires only a declarative config entry in `src/quarry/ca
 Any language included in the game's localization files. Pass the language code to `--language`:
 
 `en-US`, `fr-FR`, `de-DE`, `es-ES`, `it-IT`, `pt-BR`, `ru-RU`, `zh-Hans`, `zh-Hant`, `ja-JP`, `ko-KR`, `pl-PL`, `tr-TR`, `cs-CZ`
+
+## Web Interface
+
+A static encyclopedia site for browsing the extracted data. See [web/README.md](web/README.md) for setup and development.
