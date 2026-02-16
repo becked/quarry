@@ -10,23 +10,19 @@ Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 ```
 
-Quarry needs access to the game's XML data. Create a `Reference/` symlink pointing to your game install:
-
-```bash
-ln -s "/path/to/Old World/Reference" Reference
-```
-
 ## Usage
+
+Point `--game-path` at your Old World game installation directory:
 
 ```bash
 # Extract all categories
-uv run python -m quarry --game-path . --language en-US --output-dir ./output
+uv run python -m quarry --game-path "/path/to/Old World" --output-dir ./output
 
 # Extract specific categories
-uv run python -m quarry --game-path . --categories technologies units wonders
+uv run python -m quarry --game-path "/path/to/Old World" --categories technologies units wonders
 
 # Include game version in output metadata
-uv run python -m quarry --game-path . --version "1.0.81366"
+uv run python -m quarry --game-path "/path/to/Old World" --version "1.0.81366"
 ```
 
 Output is one JSON file per category in the output directory. Each file contains metadata and a dictionary of entries keyed by their game identifier:
