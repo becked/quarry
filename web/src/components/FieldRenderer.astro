@@ -1,6 +1,6 @@
 ---
 import { renderMarkup } from "@lib/markup";
-import { getTypeIndex } from "@lib/data";
+import { getTypeIndex, url } from "@lib/data";
 import type { FieldInfo } from "@lib/fields";
 
 interface Props {
@@ -13,7 +13,7 @@ const typeIndex = getTypeIndex();
 
 function typeIdLink(id: string): { href: string | null; label: string } {
   const cat = typeIndex.get(id);
-  return { href: cat ? `/${cat}/${id}/` : null, label: id };
+  return { href: cat ? url(`/${cat}/${id}/`) : null, label: id };
 }
 
 // Pre-cast values in frontmatter to avoid `as` in template expressions

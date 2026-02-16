@@ -89,6 +89,15 @@ export function getEntry(
   return loadAllCategories().get(category)?.entries[typeId];
 }
 
+// ── URL helpers ──────────────────────────────────────────────────────
+
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+/** Prefix a path with the site base URL. */
+export function url(path: string): string {
+  return `${BASE}${path}`;
+}
+
 // ── Display names ────────────────────────────────────────────────────
 
 const DISPLAY_OVERRIDES: Record<string, string> = {

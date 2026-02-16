@@ -1,4 +1,4 @@
-import { getTextForms, getTypeIndex, getEntry } from "./data";
+import { getTextForms, getTypeIndex, getEntry, url } from "./data";
 
 /**
  * Convert game text markup to HTML.
@@ -15,7 +15,7 @@ export function renderMarkup(text: string): string {
       const displayText = resolveDisplayText(typeId, index);
       const category = getTypeIndex().get(typeId);
       if (category) {
-        return `<a href="/${category}/${typeId}/" class="text-blue-700 hover:text-blue-900 underline decoration-blue-300">${escapeHtml(displayText)}</a>`;
+        return `<a href="${url(`/${category}/${typeId}/`)}" class="text-blue-700 hover:text-blue-900 underline decoration-blue-300">${escapeHtml(displayText)}</a>`;
       }
       return `<span class="font-medium">${escapeHtml(displayText)}</span>`;
     },

@@ -1,6 +1,6 @@
 ---
 import Base from "@layouts/Base.astro";
-import { getAllCategories, getCategory } from "@lib/data";
+import { getAllCategories, getCategory, url } from "@lib/data";
 import { renderMarkup, stripMarkup } from "@lib/markup";
 
 export function getStaticPaths() {
@@ -24,7 +24,7 @@ const entries = Object.entries(catFile.entries).map(([id, entry]) => ({
 
 <Base title={displayName}>
   <nav class="text-sm text-stone-500 mb-4">
-    <a href="/" class="hover:text-stone-700">Home</a>
+    <a href={url("/")} class="hover:text-stone-700">Home</a>
     <span class="mx-1">/</span>
     <span>{displayName}</span>
   </nav>
@@ -36,7 +36,7 @@ const entries = Object.entries(catFile.entries).map(([id, entry]) => ({
     {
       entries.map(({ id, name, subtitle }) => (
         <a
-          href={`/${category}/${id}/`}
+          href={url(`/${category}/${id}/`)}
           class="block rounded border border-stone-200 bg-white px-4 py-3 hover:bg-stone-50 hover:border-stone-300 transition-colors"
         >
           <div class="font-medium" set:html={renderMarkup(name)} />

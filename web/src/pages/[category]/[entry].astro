@@ -1,6 +1,6 @@
 ---
 import Base from "@layouts/Base.astro";
-import { getAllCategories, getCategory } from "@lib/data";
+import { getAllCategories, getCategory, url } from "@lib/data";
 import { stripMarkup } from "@lib/markup";
 import { prepareFields } from "@lib/fields";
 import FieldRenderer from "@components/FieldRenderer.astro";
@@ -36,9 +36,9 @@ const title = nameField ? stripMarkup(String(nameField.value)) : typeId;
 
 <Base title={`${title} - ${displayName}`}>
   <nav class="text-sm text-stone-500 mb-4">
-    <a href="/" class="hover:text-stone-700">Home</a>
+    <a href={url("/")} class="hover:text-stone-700">Home</a>
     <span class="mx-1">/</span>
-    <a href={`/${category}/`} class="hover:text-stone-700">{displayName}</a>
+    <a href={url(`/${category}/`)} class="hover:text-stone-700">{displayName}</a>
     <span class="mx-1">/</span>
     <span>{title}</span>
   </nav>
